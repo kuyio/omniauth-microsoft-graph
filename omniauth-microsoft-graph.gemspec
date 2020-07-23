@@ -5,7 +5,7 @@ require File.expand_path(
 
 Gem::Specification.new do |spec|
   spec.name          = "omniauth-microsoft-graph"
-  spec.version       = Omniauth::MicrosoftGraph::VERSION
+  spec.version       = OmniAuth::MicrosoftGraph::VERSION
   spec.authors       = ["Nicolas Bettenburg"]
   spec.email         = ["nicbet@kuy.io"]
 

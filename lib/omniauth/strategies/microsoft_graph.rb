@@ -7,16 +7,16 @@ module OmniAuth
   module Strategies
     # Implements an OmniAuth strategy to get a Microsoft Graph
     # compatible token from Azure AD
-    class MicrosoftGraph < Omniauth::Strategies::OAuth2
-      option :name, :microsoft_graph
+    class MicrosoftGraph < OmniAuth::Strategies::OAuth2
+      option :name, 'microsoft_graph'
 
       DEFAULT_SCOPE = 'openid email profile User.Read'
 
+      option :tenant, 'common'
+
       # Configure the Microsoft identity platform endpoints
       option :client_options,
-             site: 'https://login.microsoftonline.com',
-             authorize_url: '/common/oauth2/v2.0/authorize',
-             token_url: '/common/oauth2/v2.0/token'
+             site: 'https://login.microsoftonline.com'
 
       # Send the scope parameter during authorize
       option :authorize_options, [:scope]
@@ -29,6 +29,17 @@ module OmniAuth
         {
           'raw_info' => raw_info
         }
+      end
+
+      def client
+        ::OAuth2::Client.new(
+          options.client_id,
+          options.client_secret,
+          deep_symbolize(options.client_options).merge(
+            authorize_url: "/#{options.tenant}/oauth2/v2.0/authorize",
+            token_url: "/#{options.tenant}/oauth2/v2.0/token"
+          )
+        )
       end
 
       def raw_info
