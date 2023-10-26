@@ -10,24 +10,40 @@ module OmniAuth
     class MicrosoftGraph < OmniAuth::Strategies::OAuth2
       option :name, 'microsoft_graph'
 
-      DEFAULT_SCOPE = 'openid email profile User.Read'
+      BASE_SCOPE_URL  = 'https://graph.microsoft.com/'
+      BASE_SCOPES     = 'offline_access openid email profile'
+      DEFAULT_SCOPE   = 'offline_access openid email profile User.Read'
 
       option :tenant, 'common'
 
       # Configure the Microsoft identity platform endpoints
-      option :client_options,
-             site: 'https://login.microsoftonline.com'
+      option :client_options, site: 'https://login.microsoftonline.com'
 
-      # Send the scope parameter during authorize
-      option :authorize_options, [:scope]
+      option :authorize_options, %i[scope state callback_url access_type auth_type prompt response_mode]
+
+      # See https://learn.microsoft.com/en-us/graph/permissions-overview?tabs=http#permissions-naming-pattern
+      option :scope, DEFAULT_SCOPE
 
       # Unique ID for the user is the id field
       uid { raw_info['id'] }
 
+      # Get user information from graph
+      info do
+        {
+          'email' => raw_info['mail'] || raw_info['userPrincipalName'],
+          'first_name' => raw_info['givenName'],
+          'last_name' => raw_info['surname'],
+          'fullname' => [raw_info['givenName'], raw_info['surname']].join(' '),
+          'name' => raw_info['displayName']
+        }
+      end
+
       # Get additional information after token is retrieved
       extra do
         {
-          'raw_info' => raw_info
+          'raw_info' => raw_info,
+          'params' => access_token.params,
+          'aud' => options.client_id
         }
       end
 
@@ -44,15 +60,23 @@ module OmniAuth
 
       def raw_info
         # Get user profile information from the /me endpoint
-        @raw_info ||= access_token.get('https://graph.microsoft.com/v1.0/me').parsed
+        @raw_info ||= access_token.get("#{BASE_SCOPE_URL}/v1.0/me").parsed
       end
 
+      # rubocop:disable Metrics/AbcSize
       def authorize_params
         super.tap do |params|
-          params['scope'.to_sym] = request.params['scope'] if request.params['scope']
-          params[:scope] ||= DEFAULT_SCOPE
+          options[:authorize_options].each do |k|
+            params[k] = request.params[k.to_s] unless [nil, ''].include?(request.params[k.to_s])
+          end
+
+          params[:scope] = get_scope(params)
+          params[:access_type] = 'offline' if params[:access_type].nil?
+
+          session['omniauth.state'] = params[:state] if params[:state]
         end
       end
+      # rubocop:enable Metrics/AbcSize
 
       # Override callback URL
       # OmniAuth by default passes the entire URL of the callback, including
@@ -60,6 +84,14 @@ module OmniAuth
       # registered callback.
       def callback_url
         options[:redirect_uri] || (full_host + script_name + callback_path)
+      end
+
+      private
+
+      def get_scope(params)
+        raw_scope = params[:scope] || DEFAULT_SCOPE
+        scope_list = raw_scope.split(' ').map { |item| item.split(',') }.flatten
+        scope_list.join(' ')
       end
     end
   end
