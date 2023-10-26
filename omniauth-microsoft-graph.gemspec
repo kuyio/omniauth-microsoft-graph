@@ -29,8 +29,8 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   # Runtime Dependencies
-  spec.add_runtime_dependency 'omniauth', '>= 1.1.1'
-  spec.add_runtime_dependency 'omniauth-oauth2', '>= 1.6'
+  spec.add_runtime_dependency 'omniauth', '>= 2.0.0'
+  spec.add_runtime_dependency 'omniauth-oauth2', '>= 1.8'
 
   # Development Dependencies
   spec.add_development_dependency 'rake', '~> 12.0'

@@ -2,8 +2,8 @@ PATH
   remote: .
   specs:
     omniauth-microsoft-graph (0.2.0)
-      omniauth (>= 1.1.1)
-      omniauth-oauth2 (>= 1.6)
+      omniauth (>= 2.0.0)
+      omniauth-oauth2 (>= 1.8)
 
 GEM
   remote: https://rubygems.org/
