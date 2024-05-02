@@ -16,7 +16,6 @@ Gem::Specification.new do |spec|
 
 
   spec.metadata["homepage_uri"] = spec.homepage
-  spec.metadata["source_code_uri"] = "https://github.com/kuyio/omniauth-microsoft-graph"
   spec.metadata["changelog_uri"] = "https://github.com/kuyio/omniauth-microsoft-graph/CHANGELOG"
 
   # Specify which files should be added to the gem when it is released.
@@ -29,11 +28,6 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   # Runtime Dependencies
-  spec.add_runtime_dependency 'omniauth', '>= 2.0.0'
-  spec.add_runtime_dependency 'omniauth-oauth2', '>= 1.8'
-
-  # Development Dependencies
-  spec.add_development_dependency 'rake', '~> 12.0'
-  spec.add_development_dependency 'rspec', '~> 3.6'
-  spec.add_development_dependency 'rubocop', '~> 0.49'
+  spec.add_runtime_dependency 'omniauth', '~> 2.0'
+  spec.add_runtime_dependency 'omniauth-oauth2', '~> 1.8'
 end
